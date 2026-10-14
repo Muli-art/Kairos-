@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mau Safari Studio | 2099</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color:#355335; /* Forest Green */
+            color: #ffffff;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 3rem 4rem;
+        }
+
+        /* SECTION 1: HEADER */
+        header.site-header {
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 1.5rem;
+            font-family:Georgia;
+        }
+
+        header.site-header h1 {
+            font-size: 5rem;
+            font-weight: 200;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            text-align:center;
+        }
+
+        header.site-header p {
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-top: 0.3rem;
+        }
+
+        /* GRID SECTION (LEFT & RIGHT) */
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            margin: 3rem 0;
+        }
+
+        /* LEFT COLUMN: AUDIO PLAYER */
+        .left-section {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 2.5rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .left-section h3 {
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            opacity: 0.8;
+            margin-bottom: 1.5rem;
+        }
+
+        audio.local-audio {
+            width: 100%;
+            outline: none;
+        }
+
+        /* RIGHT COLUMN: FUTURISTIC TEXT (MAU 2099) */
+        .right-section {
+            padding: 1rem;
+        }
+
+        .right-section h2 {
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        .right-section p {
+            font-size: 0.95rem;
+            line-height: 1.7;
+            letter-spacing: 1px;
+            opacity: 0.85;
+            font-weight: 300;
+        }
+
+        /* FOOTER & CONVERSION CTA */
+        footer.site-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            padding-top: 1.5rem;
+        }
+
+        .footer-text {
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+
+        .enter-btn {
+            background-color: #ffffff;
+            color: #14c390;
+            text-decoration: none;
+            padding: 0.8rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .enter-btn:hover {
+            background-color: #0d8a65;
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive design for smaller screens */
+        @media (max-width: 900px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            body {
+                padding: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SECTION 1: HEADER -->
+    <header class="site-header">
+        <h1>MAU FOREST IMAGINARIA</h1>
+        <p>A Forest Imaginarium</p>
+    </header>
+
+    <!-- SECTION 2: GRID CONTAINER (LEFT & RIGHT) -->
+    <main class="grid-container">
+        
+        <!-- Left Section: Continuous Audio Player -->
+        <div class="left-section">
+            <h3>Continuous Soundscape</h3>
+            <!-- Added id and muted to allow seamless automatic playback -->
+            <audio id="autoAudio" class="local-audio" controls autoplay loop muted>
+                <source src="Audiomoth Extended Mau Forest Recording - Amplified.mp3" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+        </div>
+
+        <!-- Right Section: Futuristic Text (Mau in 2099) -->
+        <div class="right-section">
+            <h2>Archive // Mau 2099</h2>
+            <p>
+                In the year 2099, the boundaries between organic ecosystems and autonomous memory have dissolved. Mau stands as a reconstructed sanctuary—where synthetic canopy resonance mirrors ancient elephant migrations, and digital echoes preserve the final wild frequencies of the equatorial highlands. Listen closely; the ecosystem remembers what time forgot.
+            </p>
+        </div>
+
+    </main>
+
+    <!-- FOOTER & CONVERSION CTA -->
+    <footer class="site-footer">
+        <span class="footer-text">&copy; 2026—2099 Mau Safari Studio</span>
+        <a href="#exhibition" class="enter-btn">Enter Exhibition</a>
+    </footer>
+
+    <!-- Script to force immediate playback on load -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const audio = document.getElementById('autoAudio');
+            audio.play().catch(error => {
+                console.log("Autoplay was restricted by browser policies:", error);
+            });
+        });
+    </script>
+
+</body>
+</html>
