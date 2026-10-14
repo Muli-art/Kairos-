@@ -73,9 +73,13 @@
             margin-bottom: 1.5rem;
         }
 
+        /* ADVANCED AUDIO PLAYER: Larger player with custom layout & styling */
         audio.local-audio {
             width: 100%;
+            height: 65px;
             outline: none;
+            accent-color: #14c390;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
         }
 
         /* RIGHT COLUMN: FUTURISTIC TEXT (MAU 2099) */
@@ -152,8 +156,7 @@
 
     <!-- SECTION 1: HEADER -->
     <header class="site-header">
-        <h1>MAU FOREST IMAGINARIA</h1>
-        <p>A Forest Imaginarium</p>
+        <h1>FOREST MODE🎵</h1>
     </header>
 
     <!-- SECTION 2: GRID CONTAINER (LEFT & RIGHT) -->
@@ -162,8 +165,8 @@
         <!-- Left Section: Continuous Audio Player -->
         <div class="left-section">
             <h3>Continuous Soundscape</h3>
-            <!-- Added id and muted to allow seamless automatic playback -->
-            <audio id="autoAudio" class="local-audio" controls autoplay loop muted>
+            <!-- Removed 'muted' attribute and ensured autoplay with loop -->
+            <audio id="autoAudio" class="local-audio" controls autoplay loop>
                 <source src="Audiomoth Extended Mau Forest Recording - Amplified.mp3" type="audio/mpeg">
                 Your browser does not support the audio element.
             </audio>
@@ -185,12 +188,24 @@
         <a href="#exhibition" class="enter-btn">Enter Exhibition</a>
     </footer>
 
-    <!-- Script to force immediate playback on load -->
+    <!-- Script to force immediate playback on load with unmuted audio -->
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             const audio = document.getElementById('autoAudio');
+            audio.muted = false; // Ensure sound is on
             audio.play().catch(error => {
-                console.log("Autoplay was restricted by browser policies:", error);
+                console.log("Autoplay with sound was restricted by browser policies, interacting with the page will start audio:", error);
+                
+                // Fallback: trigger playback on the first user interaction anywhere on the page
+                const unlockAudio = () => {
+                    audio.play();
+                    window.removeEventListener('click', unlockAudio);
+                    window.removeEventListener('keydown', unlockAudio);
+                    window.removeEventListener('touchstart', unlockAudio);
+                };
+                window.addEventListener('click', unlockAudio);
+                window.addEventListener('keydown', unlockAudio);
+                window.addEventListener('touchstart', unlockAudio);
             });
         });
     </script>
