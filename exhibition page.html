@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exhibition Catalogue | Mau Safari Studio</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #1c3022; /* Forest Green */
+            color: #ffffff;
+            font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            min-height: 100vh;
+            padding: 3rem 4rem;
+        }
+
+        /* LANDING PAGE TITLE & FEATURED GRID BOX SECTION */
+        header.catalogue-header {
+            margin-bottom: 3rem;
+        }
+
+        header.catalogue-header h1 {
+            font-size: 3.5rem;
+            font-weight: 200;
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            font-family: Georgia, serif;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        /* LANDING GRID BOX: Images on the left, text on the right */
+        .landing-grid-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 3rem;
+            border-radius: 16px;
+            margin-bottom: 4rem;
+        }
+
+        .landing-box-left {
+            width: 100%;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        .landing-box-left img {
+            width: 100%;
+            height: 380px;
+            object-fit: cover;
+            display: block;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .landing-box-left img:hover {
+            transform: scale(1.02);
+        }
+
+        .landing-box-right h2 {
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            font-weight: 400;
+        }
+
+        .landing-box-right p {
+            font-size: 1rem;
+            line-height: 1.7;
+            letter-spacing: 1px;
+            opacity: 0.85;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+        }
+
+        .landing-box-right .artist-credit {
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.7;
+        }
+
+        /* CATALOGUE SECTION TITLE */
+        .section-title {
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 2rem;
+            font-weight: 400;
+            opacity: 0.9;
+        }
+
+        /* CATALOGUE GRID: 4 columns on desktop, 2 columns on mobile */
+        .catalogue-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+        }
+
+        .catalogue-item {
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            min-width: 0; /* Prevents grid items from overflowing */
+        }
+
+        .catalogue-item img {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            display: block;
+            border-radius: 8px;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+
+        .catalogue-item img:hover {
+            opacity: 0.9;
+            transform: translateY(-4px);
+        }
+
+        .catalogue-item .artwork-info {
+            margin-top: 0.8rem;
+        }
+
+        .catalogue-item h3 {
+            font-size: 0.95rem;
+            font-weight: 500;
+            letter-spacing: 1px;
+            margin-bottom: 0.2rem;
+        }
+
+        .catalogue-item p {
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+
+        /* FULLSCREEN LIGHTBOX OVERLAY WITH SWIPE/NAVIGATION */
+        .lightbox-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(26, 40, 26, 0.95);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .lightbox-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .lightbox-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .lightbox-content img {
+            max-width: 90vw;
+            max-height: 70vh;
+            object-fit: contain;
+            border-radius: 4px;
+        }
+
+        .lightbox-details {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .lightbox-details h2 {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin-bottom: 0.3rem;
+            font-weight: 400;
+        }
+
+        .lightbox-details p {
+            font-size: 0.85rem;
+            letter-spacing: 1.5px;
+            opacity: 0.7;
+            text-transform: uppercase;
+        }
+
+        /* Lightbox Controls (Close, Next, Previous) */
+        .lightbox-close {
+            position: absolute;
+            top: 2rem;
+            right: 3rem;
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 2.5rem;
+            cursor: pointer;
+            opacity: 0.8;
+            transition: opacity 0.2s;
+        }
+
+        .lightbox-close:hover {
+            opacity: 1;
+        }
+
+        .lightbox-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: #ffffff;
+            font-size: 2rem;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border-radius: 50%;
+            transition: background 0.2s;
+            z-index: 1010;
+        }
+
+        .lightbox-nav:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .lightbox-prev {
+            left: 2rem;
+        }
+
+        .lightbox-next {
+            right: 2rem;
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 900px) {
+            body {
+                padding: 1.5rem;
+            }
+
+            .landing-grid-box {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                padding: 1.5rem;
+            }
+
+            .catalogue-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 columns on phone */
+                gap: 1rem;
+            }
+
+            header.catalogue-header h1 {
+                font-size: 2.2rem;
+            }
+
+            .lightbox-prev {
+                left: 1rem;
+            }
+
+            .lightbox-next {
+                right: 1rem;
+            }
+
+            .lightbox-close {
+                top: 1rem;
+                right: 1rem;
+            }
+        }
+
+
+
+        /* --- PRINTS SECTION UNIQUE STYLING --- */
+.prints-section {
+    margin-top: 5rem;
+    padding-top: 3rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.prints-section .section-title {
+    color: #d4af37; /* Distinct gold accent for prints */
+    letter-spacing: 5px;
+}
+
+.prints-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+
+.print-item {
+    display: flex;
+    flex-direction: column;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(212, 175, 55, 0.2); /* Subtle gold border */
+    padding: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 0;
+    transition: all 0.3s ease;
+}
+
+.print-item:hover {
+    border-color: #d4af37;
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-4px);
+}
+
+.print-item img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    display: block;
+    border-radius: 6px;
+    transition: opacity 0.3s ease;
+}
+
+.print-item img:hover {
+    opacity: 0.9;
+}
+
+.print-item .artwork-info {
+    margin-top: 0.8rem;
+}
+
+.print-item h3 {
+    font-size: 0.95rem;
+    font-weight: 500;
+    letter-spacing: 1px;
+    margin-bottom: 0.2rem;
+}
+
+.print-item p {
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    opacity: 0.7;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+}
+
+.print-edition-badge {
+    font-size: 0.65rem;
+    color: #d4af37;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+    .prints-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+}
+    </style>
+</head>
+<body>
+
+    <!-- LANDING PAGE HEADER & TITLE -->
+    <header class="catalogue-header">
+        <h1>Exhibition Catalogue</h1>
+
+        <!-- LANDING GRID BOX: Image on left, Text/Metadata on right -->
+        <div class="landing-grid-box">
+            <div class="landing-box-left">
+                <img src="4.jpeg" alt="Featured Artwork - Canopy Echoes" class="gallery-trigger" data-index="0" onerror="handleImageError(this, 'muli/4.jpeg')">
+            </div>
+            <div class="landing-box-right">
+                <h2>Featured Archive // 2099</h2>
+                <p>
+                    A visual exploration of synthetic forestry and wild preservation. Each piece within this catalogue chronicles the evolving dialogue between untamed equatorial wildlife and autonomous structural ecosystems.
+                </p>
+                <div class="artist-credit">Artist: Elena Vance</div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CATALOGUE SECTION -->
+    <main>
+        <h2 class="section-title">Complete Collection</h2>
+        
+        <div class="catalogue-grid" id="catalogueGrid">
+            <!-- Items populated via HTML / JS for smooth lightbox tracking -->
+            <div class="catalogue-item" data-index="0">
+                <img src="Noah Kirui.JPG" alt="Canopy Echoes" class="gallery-trigger" onerror="handleImageError(this, 'muli/4.jpeg')">
+                <div class="artwork-info">
+                    <h3>Noah Kirui</h3>
+                    <p>In the year 2099, Noah Kirui imagined a future where people embody elephant energy during rituals that help them connect more deeply with the forest.</p>
+                </div>
+            </div>
+
+            <div class="catalogue-item" data-index="1">
+                <img src="Ezra Kosgei 1.JPG" alt="Equatorial Flare" class="gallery-trigger" onerror="handleImageError(this, 'muli/1.jpg')">
+                <div class="artwork-info">
+                    <h3>Ezra Kosgei</h3>
+                    <p>Ezra Kosgei imagined a world in which people carry trees on their bodies to plant in any place that needs healing.</p>
+                </div>
+            </div>
+
+            <div class="catalogue-item" data-index="2">
+                <img src="Beatrice Chepng'etich.JPG" alt="Silent Waters" class="gallery-trigger" onerror="handleImageError(this, 'muli/2.jpg')">
+                <div class="artwork-info">
+                    <h3>Beatrice Chepng'etich</h3>
+                    <p>Beatrice Chepng'etich made a prototype for a flying ambulance that would transport patients to a forest hospital in 2099.</p>
+                </div>
+            </div>
+
+            <div class="catalogue-item" data-index="3">
+                <img src="Ezra Kosgei.jpeg" alt="Golden Blossom" class="gallery-trigger" onerror="handleImageError(this, 'muli/3.jpg')">
+                <div class="artwork-info">
+                    <h3>Ezra Kosgei</h3>
+                    <p>Ezra Kosgei imagined a world in which people carry trees on their bodies to plant in any place that needs healing.</p>
+                </div>
+            </div>
+
+            <div class="catalogue-item" data-index="4">
+                <img src="4.jpeg" alt="Synthesized Flora" class="gallery-trigger" onerror="handleImageError(this, 'Synthesized Flora')">
+                <div class="artwork-info">
+                    <h3>Synthesized Flora</h3>
+                    <p>This tea basket woven from a local vine that grows in the forest was reimagined as a sanctuary space instead of a tool for extractive labor.</p>
+                </div>
+            </div>
+
+            <div class="catalogue-item" data-index="5">
+                <img src="https://images.unsplash.com/photo-1561214115-f2f134cc4912?auto=format&fit=crop&w=1000&q=80" alt="Verdant Monolith" class="gallery-trigger" onerror="handleImageError(this, 'Verdant Monolith')">
+                <div class="artwork-info">
+                    <h3>Verdant Monolith</h3>
+                    <p>Aris Thorne</p>
+                </div>
+            </div>
+
+            <div class="catalogue-item" data-index="6">
+                <img src="https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1000&q=80" alt="Memory Fragment" class="gallery-trigger" onerror="handleImageError(this, 'Memory Fragment')">
+                <div class="artwork-info">
+                    <h3>Memory Fragment</h3>
+                    <p>Elena Vance</p>
+                </div>
+            </div>
+
+            <div class="catalogue-item" data-index="7">
+                <img src="https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1000&q=80" alt="Horizon 2099" class="gallery-trigger" onerror="handleImageError(this, 'Horizon 2099')">
+                <div class="artwork-info">
+                    <h3>Horizon 2099</h3>
+                    <p>Kenji Tanaka</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+
+
+<!-- PRINTS EDITION SECTION -->
+<section class="prints-section">
+    <h2 class="section-title">Archival Print Editions</h2>
+    
+    <div class="prints-grid" id="printsGrid">
+        <div class="print-item" data-index="8">
+            <img src="Noah Kirui.JPG" alt="Canopy Echoes Print" class="gallery-trigger" onerror="handleImageError(this, 'muli/4.jpeg')">
+            <div class="artwork-info">
+                <h3>Noah Kirui (Fine Art Print)</h3>
+                <p>Archival Giclée on Hahnemühle Rag</p>
+                <div class="print-edition-badge">Limited Edition of 50 // Signed</div>
+            </div>
+        </div>
+
+        <div class="print-item" data-index="9">
+            <img src="Ezra Kosgei 1.JPG" alt="Equatorial Flare Print" class="gallery-trigger" onerror="handleImageError(this, 'muli/1.jpg')">
+            <div class="artwork-info">
+                <h3>Ezra Kosgei (Edition Plate)</h3>
+                <p>Museum-Grade Cotton Rag Print</p>
+                <div class="print-edition-badge">Limited Edition of 30 // Hand-Numbered</div>
+            </div>
+        </div>
+
+        <div class="print-item" data-index="10">
+            <img src="Beatrice Chepng'etich.JPG" alt="Silent Waters Print" class="gallery-trigger" onerror="handleImageError(this, 'muli/2.jpg')">
+            <div class="artwork-info">
+                <h3>Beatrice Chepng'etich (Studio Print)</h3>
+                <p>Duotone Photographic Print</p>
+                <div class="print-edition-badge">Limited Edition of 100 // Embossed</div>
+            </div>
+        </div>
+
+        <div class="print-item" data-index="11">
+            <img src="4.jpeg" alt="Synthesized Flora Print" class="gallery-trigger" onerror="handleImageError(this, 'muli/3.jpg')">
+            <div class="artwork-info">
+                <h3>Synthesized Flora (Plate IV)</h3>
+                <p>Archival Pigment Print</p>
+                <div class="print-edition-badge">Limited Edition of 25 // Certificate Included</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    
+
+
+
+
+
+    <!-- FULLSCREEN LIGHTBOX CONTAINER -->
+    <div class="lightbox-overlay" id="lightbox">
+        <button class="lightbox-close" id="lightboxClose">&times;</button>
+        <button class="lightbox-nav lightbox-prev" id="lightboxPrev">&#10094;</button>
+        <button class="lightbox-nav lightbox-next" id="lightboxNext">&#10095;</button>
+        
+        <div class="lightbox-content">
+            <img id="lightboxImg" src="" alt="">
+            <div class="lightbox-details">
+                <h2 id="lightboxTitle">Title</h2>
+                <p id="lightboxArtist">Artist Name</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT FOR LIGHTBOX & ROBUST IMAGE FALLBACKS -->
+    <script>
+        // High quality curated fallback pool of nature & abstract art images from Unsplash
+        const fallbackPool = [
+            'Muli/1.jpg',
+            'Muli/1.jpg',
+            'https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&w=1000&q=80',
+            'https://images.unsplash.com/photo-1578926375605-eaf7559b1458?auto=format&fit=crop&w=1000&q=80',
+            'https://images.unsplash.com/photo-1582561304077-e2651e06497f?auto=format&fit=crop&w=1000&q=80',
+            'https://images.unsplash.com/photo-1561214115-f2f134cc4912?auto=format&fit=crop&w=1000&q=80',
+            'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?auto=format&fit=crop&w=1000&q=80',
+            'https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?auto=format&fit=crop&w=1000&q=80'
+        ];
+
+        function handleImageError(imgElement, identifier) {
+            // Prevent infinite error loops
+            if (imgElement.dataset.fallbackTried) return;
+            imgElement.dataset.fallbackTried = "true";
+
+            // Pick a deterministic fallback based on index or random
+            const indexAttr = imgElement.closest('.catalogue-item')?.getAttribute('data-index') || 0;
+            imgElement.src = fallbackPool[indexAttr % fallbackPool.length];
+        }
+
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightboxImg');
+        const lightboxTitle = document.getElementById('lightboxTitle');
+        const lightboxArtist = document.getElementById('lightboxArtist');
+        const lightboxClose = document.getElementById('lightboxClose');
+        const lightboxPrev = document.getElementById('lightboxPrev');
+        const lightboxNext = document.getElementById('lightboxNext');
+
+        // Collect all artwork data dynamically from the page
+        const artworks = [];
+        document.querySelectorAll('.catalogue-item').forEach((item, index) => {
+            const img = item.querySelector('img');
+            const title = item.querySelector('h3').innerText;
+            const artist = item.querySelector('p').innerText;
+            artworks.push({ imgElement: img, title: title, artist: artist });
+            
+            // Assign data-index for uniform mapping
+            item.setAttribute('data-index', index);
+        });
+
+        // Also map the featured top image to index 0
+        const landingImg = document.querySelector('.landing-box-left img');
+        if (landingImg) {
+            landingImg.setAttribute('data-index', '0');
+        }
+
+        let currentIndex = 0;
+
+        function openLightbox(index) {
+            currentIndex = parseInt(index);
+            updateLightboxContent();
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+        }
+
+        function updateLightboxContent() {
+            const currentArtwork = artworks[currentIndex];
+            // Always read the live src (respecting fallback or loaded state)
+            lightboxImg.src = currentArtwork.imgElement.src;
+            lightboxTitle.innerText = currentArtwork.title;
+            lightboxArtist.innerText = currentArtwork.artist;
+        }
+
+        function showNext() {
+            currentIndex = (currentIndex + 1) % artworks.length;
+            updateLightboxContent();
+        }
+
+        function showPrev() {
+            currentIndex = (currentIndex - 1 + artworks.length) % artworks.length;
+            updateLightboxContent();
+        }
+
+        // Event Listeners for opening
+        document.querySelectorAll('.gallery-trigger').forEach(trigger => {
+            trigger.addEventListener('click', (e) => {
+                const catalogueItem = e.currentTarget.closest('.catalogue-item') || e.currentTarget.closest('.landing-grid-box');
+                const idx = catalogueItem ? catalogueItem.getAttribute('data-index') : e.currentTarget.getAttribute('data-index');
+                if (idx !== null) {
+                    openLightbox(idx);
+                }
+            });
+        });
+
+        document.querySelectorAll('.catalogue-item').forEach(item => {
+            item.addEventListener('click', (e) => {
+                const idx = e.currentTarget.getAttribute('data-index');
+                if (idx !== null) {
+                    openLightbox(idx);
+                }
+            });
+        });
+
+        // Close and navigation button handlers
+        lightboxClose.addEventListener('click', closeLightbox);
+        lightboxNext.addEventListener('click', (e) => { e.stopPropagation(); showNext(); });
+        lightboxPrev.addEventListener('click', (e) => { e.stopPropagation(); showPrev(); });
+
+        // Close when clicking outside content background
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+
+        // Keyboard navigation (Left/Right arrows and Escape)
+        document.addEventListener('keydown', (e) => {
+            if (!lightbox.classList.contains('active')) return;
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowRight') showNext();
+            if (e.key === 'ArrowLeft') showPrev();
+        });
+
+        // Touch/Swipe Support for Mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        lightbox.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, {passive: true});
+
+        lightbox.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, {passive: true});
+
+        function handleSwipe() {
+            const threshold = 50;
+            if (touchEndX < touchStartX - threshold) {
+                showNext(); // Swipe left -> next image
+            }
+            if (touchEndX > touchStartX + threshold) {
+                showPrev(); // Swipe right -> previous image
+            }
+        }
+    </script>
+
+</body>
+</html> 
