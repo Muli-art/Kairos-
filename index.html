@@ -75,8 +75,12 @@
 
         /* ADVANCED AUDIO PLAYER: Larger player with custom layout & styling */
         audio.local-audio {
-            width: 100%;
-            height: 65px;
+            display: block;
+            width: calc(100% / 1.5);      /* compensates for the 1.5x scale so it still fits the card */
+            height: 80px;
+            transform: scale(1.5);        /* BIG player */
+            transform-origin: left center;
+            margin: 1.5rem 0;
             outline: none;
             accent-color: #14c390;
             filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
@@ -166,7 +170,7 @@
         <div class="left-section">
             <h3>Continuous Soundscape</h3>
             <!-- Removed 'muted' attribute and ensured autoplay with loop -->
-            <audio id="autoAudio" class="local-audio" controls autoplay loop>
+            <audio id="autoAudio" class="local-audio" controls autoplay loop preload="auto">
                 <source src="Audiomoth Extended Mau Forest Recording - Amplified.mp3" type="audio/mpeg">
             
             </audio>
@@ -193,19 +197,53 @@
         window.addEventListener('DOMContentLoaded', () => {
             const audio = document.getElementById('autoAudio');
             audio.muted = false; // Ensure sound is on
+
+            // Every interaction that browsers accept as a "gesture" will unlock sound
+            const events = ['click', 'keydown', 'touchstart', 'touchend', 'pointerdown'];
+            const unlockAudio = () => {
+                audio.muted = false;
+                audio.play().then(() => {
+                    events.forEach(e => window.removeEventListener(e, unlockAudio));
+                }).catch(() => {});
+            };
+
             audio.play().catch(error => {
                 console.log("Autoplay with sound was restricted by browser policies, interacting with the page will start audio:", error);
-                
-                // Fallback: trigger playback on the first user interaction anywhere on the page
-                const unlockAudio = () => {
-                    audio.play();
-                    window.removeEventListener('click', unlockAudio);
-                    window.removeEventListener('keydown', unlockAudio);
-                    window.removeEventListener('touchstart', unlockAudio);
-                };
-                window.addEventListener('click', unlockAudio);
-                window.addEventListener('keydown', unlockAudio);
-                window.addEventListener('touchstart', unlockAudio);
+
+                // Start silently right away (always allowed), then switch the sound on at the first tap/click/key
+                audio.muted = true;
+                audio.play().catch(() => {});
+                events.forEach(e => window.addEventListener(e, unlockAudio));
+            });
+
+            // Resume if the browser paused the audio when the tab/app was hidden
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden && audio.paused) audio.play().catch(() => {});
+            });
+
+            // KEEP AUDIO PLAYING when entering the exhibition:
+            // the exhibition opens on top of this page (same tab), so this page and its audio never unload.
+            const enterBtn = document.querySelector('.enter-btn');
+            let frame = null;
+
+            enterBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                audio.muted = false;
+                audio.play().catch(() => {});
+
+                frame = document.createElement('iframe');
+                frame.src = enterBtn.getAttribute('href');
+                frame.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;border:0;z-index:9999;background:#355335;';
+                document.body.appendChild(frame);
+                history.pushState({ exhibition: true }, '', '#exhibition');
+            });
+
+            // Browser back button closes the exhibition and returns to this page (audio keeps going)
+            window.addEventListener('popstate', () => {
+                if (frame) {
+                    frame.remove();
+                    frame = null;
+                }
             });
         });
     </script>
