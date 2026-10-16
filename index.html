@@ -73,17 +73,77 @@
             margin-bottom: 1.5rem;
         }
 
-        /* ADVANCED AUDIO PLAYER: Larger player with custom layout & styling */
+        /* The real audio element stays on the page (it does the playing) but its default controls are gone */
         audio.local-audio {
-            display: block;
-            width: calc(100% / 1.5);      /* compensates for the 1.5x scale so it still fits the card */
-            height: 80px;
-            transform: scale(1.5);        /* BIG player */
-            transform-origin: left center;
-            margin: 1.5rem 0;
+            display: none;
+        }
+
+        /* CUSTOM PLAYER: big play button + timeline (no speaker, no dots) */
+        .player {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .play-btn {
+            flex: 0 0 auto;
+            width: 100px;
+            height: 100px;
+            border: none;
+            border-radius: 50%;
+            background-color: #14c390;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
             outline: none;
-            accent-color: #14c390;
-            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2));
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2), 0 10px 25px rgba(0, 0, 0, 0.15);
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .play-btn:hover {
+            background-color: #0d8a65;
+            transform: scale(1.06);
+        }
+
+        .play-btn svg {
+            width: 52px;
+            height: 52px;
+        }
+
+        .play-btn .icon-play  { display: block; margin-left: 5px; }
+        .play-btn .icon-pause { display: none; }
+        .play-btn.is-playing .icon-play  { display: none; }
+        .play-btn.is-playing .icon-pause { display: block; }
+
+        .player-track {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            width: 0%;
+            height: 100%;
+            background: #14c390;
+            border-radius: 8px;
+        }
+
+        .time {
+            margin-top: 0.7rem;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            opacity: 0.7;
         }
 
         /* RIGHT COLUMN: FUTURISTIC TEXT (MAU 2099) */
@@ -169,11 +229,22 @@
         <!-- Left Section: Continuous Audio Player -->
         <div class="left-section">
             <h3>Continuous Soundscape</h3>
-            <!-- Removed 'muted' attribute and ensured autoplay with loop -->
-            <audio id="autoAudio" class="local-audio" controls autoplay loop preload="auto">
+            <!-- Autoplay + loop; default controls removed (no speaker / dots) -->
+            <audio id="autoAudio" class="local-audio" autoplay loop preload="auto">
                 <source src="Audiomoth Extended Mau Forest Recording - Amplified.mp3" type="audio/mpeg">
             
             </audio>
+
+            <div class="player">
+                <button id="playBtn" class="play-btn" type="button" aria-label="Play / Pause">
+                    <svg class="icon-play" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+                    <svg class="icon-pause" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                </button>
+                <div class="player-track">
+                    <div class="progress" id="progress"><div class="progress-fill" id="progressFill"></div></div>
+                    <div class="time" id="timeText">0:00</div>
+                </div>
+            </div>
         </div>
 
         <!-- Right Section: Futuristic Text (Mau in 2099) -->
@@ -196,29 +267,86 @@
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             const audio = document.getElementById('autoAudio');
+            const playBtn = document.getElementById('playBtn');
+            const progress = document.getElementById('progress');
+            const progressFill = document.getElementById('progressFill');
+            const timeText = document.getElementById('timeText');
             audio.muted = false; // Ensure sound is on
 
-            // Every interaction that browsers accept as a "gesture" will unlock sound
-            const events = ['click', 'keydown', 'touchstart', 'touchend', 'pointerdown'];
-            const unlockAudio = () => {
-                audio.muted = false;
-                audio.play().then(() => {
-                    events.forEach(e => window.removeEventListener(e, unlockAudio));
-                }).catch(() => {});
+            /* ---------- Custom player (big play button + timeline) ---------- */
+            const fmt = (s) => {
+                if (!isFinite(s)) return '0:00';
+                const m = Math.floor(s / 60);
+                const sec = Math.floor(s % 60).toString().padStart(2, '0');
+                return m + ':' + sec;
             };
 
-            audio.play().catch(error => {
-                console.log("Autoplay with sound was restricted by browser policies, interacting with the page will start audio:", error);
+            const refreshButton = () => {
+                // Shows "pause" only when sound is really coming out
+                playBtn.classList.toggle('is-playing', !audio.paused && !audio.muted);
+            };
 
-                // Start silently right away (always allowed), then switch the sound on at the first tap/click/key
-                audio.muted = true;
-                audio.play().catch(() => {});
-                events.forEach(e => window.addEventListener(e, unlockAudio));
+            const refreshTime = () => {
+                const d = audio.duration;
+                progressFill.style.width = (d ? (audio.currentTime / d) * 100 : 0) + '%';
+                timeText.textContent = fmt(audio.currentTime) + (d ? ' / ' + fmt(d) : '');
+            };
+
+            audio.addEventListener('play', refreshButton);
+            audio.addEventListener('pause', refreshButton);
+            audio.addEventListener('volumechange', refreshButton);
+            audio.addEventListener('timeupdate', refreshTime);
+            audio.addEventListener('loadedmetadata', refreshTime);
+
+            playBtn.addEventListener('click', () => {
+                if (audio.paused || audio.muted) {
+                    audio.muted = false;
+                    audio.play().catch(() => {});
+                } else {
+                    audio.pause();
+                }
             });
+
+            progress.addEventListener('click', (e) => {
+                if (!audio.duration) return;
+                const rect = progress.getBoundingClientRect();
+                audio.currentTime = ((e.clientX - rect.left) / rect.width) * audio.duration;
+            });
+
+            /* ---------- Autoplay on first landing ---------- */
+            // Every interaction that browsers accept as a "gesture" will unlock sound
+            const events = ['click', 'keydown', 'touchstart', 'touchend', 'pointerdown'];
+            const removeUnlock = () => events.forEach(e => window.removeEventListener(e, unlockAudio));
+            function unlockAudio() {
+                if (!audio.muted && !audio.paused) { removeUnlock(); return; }
+                audio.muted = false;
+                audio.play().then(removeUnlock).catch(() => {});
+            }
+
+            const tryAutoplay = () => {
+                if (!audio.paused && !audio.muted) return;
+                audio.muted = false;
+                audio.play().catch(error => {
+                    console.log("Autoplay with sound was restricted by browser policies, interacting with the page will start audio:", error);
+
+                    // Start silently right away (always allowed), then switch the sound on at the first tap/click/key
+                    audio.muted = true;
+                    audio.play().catch(() => {});
+                    events.forEach(e => window.addEventListener(e, unlockAudio));
+                });
+            };
+
+            tryAutoplay();
+            audio.addEventListener('canplay', () => { if (audio.paused) tryAutoplay(); }, { once: true });
+            window.addEventListener('load', () => { if (audio.paused) tryAutoplay(); });
+            window.addEventListener('pageshow', () => { if (audio.paused) tryAutoplay(); });
 
             // Resume if the browser paused the audio when the tab/app was hidden
             document.addEventListener('visibilitychange', () => {
-                if (!document.hidden && audio.paused) audio.play().catch(() => {});
+                if (!document.hidden && audio.paused && audio.dataset.userPaused !== '1') audio.play().catch(() => {});
+            });
+            playBtn.addEventListener('click', () => {
+                audio.dataset.userPaused = audio.paused ? '1' : '0';
             });
 
             // KEEP AUDIO PLAYING when entering the exhibition:
@@ -249,4 +377,4 @@
     </script>
 
 </body>
-</html>
+    </html>
